@@ -26,8 +26,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable().authorizeRequests().antMatchers("/resources/**", "/registration", "/api/**")
-				.permitAll().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll().and()
+		  http.cors().and().csrf().disable().authorizeRequests().antMatchers("/resources/**", "/registration", "/login", "/api/**")
+		   .permitAll().anyRequest().authenticated().and() //.formLogin().loginPage("/login").permitAll().and()
 				.logout().permitAll();
 	}
 

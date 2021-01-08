@@ -13,6 +13,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +26,17 @@ public class ImageService {
 	@Autowired
 	ImageDao imageDao;
 
-	final File folder = new File("D:\\New folder (33)");
-	final File folder1 = new File("D:\\New folder (34)");
+	@Autowired
+	private Environment env;
 
-	public List dataExtractionOutput(Integer ocrId) {
+	public List<?> dataExtractionOutput(Integer ocrId) {
 		return imageDao.dataExtractionOutput(ocrId);
 	}
 
 	public Object listAllDataExtractionJobOutput(List<Map<String, String>> ocrCoordinates) throws IOException {
 
-		// Create api instance
-
+		final File folder = new File(env.getProperty("key.folder"));
+		final File folder1 = new File(env.getProperty("key.folder.ocr"));
 		Ocr.setUp(); // one time setup
 		Ocr ocr = new Ocr(); // create a new OCR engine
 		ocr.startEngine("eng", Ocr.SPEED_SLOW); // English
@@ -93,7 +94,7 @@ public class ImageService {
 		return croppedImage;
 	}
 
-	public static void convertPdfToImage(String sourceDir, String destinationDir) {
+	public void convertPdfToImage(String sourceDir, String destinationDir) {
 		try {
 
 			File sourceFile = new File(sourceDir);
@@ -105,6 +106,7 @@ public class ImageService {
 			if (sourceFile.exists()) {
 				System.out.println("Images copied to Folder: " + destinationFile.getName());
 				PDDocument document = PDDocument.load(sourceDir);
+				@SuppressWarnings("unchecked")
 				List<PDPage> list = document.getDocumentCatalog().getAllPages();
 				System.out.println("Total files to be converted -> " + list.size());
 

@@ -8,6 +8,7 @@
 	src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script src="${contextPath}/js/jquery.Jcrop.js"></script>
 <style type="text/css">
+
 input.textBox {
 	margin-top: 5px;
 	margin-bottom: 5px;
@@ -30,6 +31,26 @@ label.inputLabel {
 	*display: inline; /* for IE7*/
 	zoom: 1; /* for IE7*/
 }
+
+.btn-file {
+	position: relative;
+	overflow: hidden;
+}
+
+.btn-file input[type=file] {
+	position: absolute;
+	top: 0;
+	right: 0;
+	min-width: 100%;
+	min-height: 100%;
+	font-size: 100px;
+	text-align: right;
+	filter: alpha(opacity = 0);
+	opacity: 0;
+	outline: none;
+	cursor: inherit;
+	display: block;
+}
 </style>
 <script type="text/javascript">
 	function previewFile(input) {
@@ -40,11 +61,42 @@ label.inputLabel {
 
 		if (file) {
 			if(file.type == "application/pdf"){
+				var formData = new FormData();
+				formData.append('file', $('input[type=file]')[0].files[0]);
+				
+				$.ajax({
+		            type: "POST",
+		            enctype: 'multipart/form-data',
+		            url: "../api/ocr/upload",
+		            data: formData,
+		            processData: false,
+		            contentType: false,
+		            cache: false,
+		            timeout: 600000,
+		            success: function (data) {  
+		            	
+		                console.log("SUCCESS : ", data.message);
+		            	$("#previewImg").attr("src", "data:image/png;base64,"+data.message);
+						initializeJcrop();
+						$("#imgDiv").show();
+
+		            },
+		            error: function (e) {
+
+		              
+		                console.log("ERROR : ", e);
+		              
+
+		            }
+		        });
+				
+				
 			}
 			else{
 				var reader = new FileReader();
 
 				reader.onload = function() {
+					
 					$("#previewImg").attr("src", reader.result);
 					initializeJcrop();
 					$("#imgDiv").show();
@@ -153,7 +205,7 @@ function getButtonValue() {
    	obj[$('#textbox' + i).val()] = $('#textValue' + i).val();
  
     }
-    	  alert(JSON.stringify(obj));
+ 
 }
 
 function saveOcrCoordMapping(){
@@ -161,7 +213,7 @@ function saveOcrCoordMapping(){
 	$.ajax({
 	      type: 'POST',
 	      contentType: "application/json; charset=utf-8",
-	      url: "../api/save/ocr-coordinates/"+$("#templateName").val(),
+	      url: "../api/ocr/save/"+$("#templateName").val(),
 	      data: JSON.stringify(obj),
 	      success: function(resultData) { 
 	    	  if(resultData=="success"){
@@ -208,10 +260,13 @@ function saveOcrCoordMapping(){
 					</div>
 					<h4>Choose File to upload</h4>
 					<div>
-						<input type="file" id="myPdf"
+						<span class="btn btn-primary btn-file"> Browse <input
+							type="file" id="myPdf" class="form-control"
 							accept="image/jpeg,image/gif,image/png,application/pdf,image/x-eps"
 							onchange="previewFile(this);" required /><br>
+						</span>
 					</div>
+					<br />
 					<div id="imgDiv" style="display: none">
 						<div>
 							<img src="${contextPath}/demo_files/sago.jpg" id="previewImg"
@@ -245,13 +300,14 @@ function saveOcrCoordMapping(){
 									class="textBox" type='text' id='textValue1'>
 							</div>
 						</div>
-						<input type='button' value='Add Field' id='addButton'> <input
-							type='button' value='Remove Field' id='removeButton'> <input
-							type='button' value='Get TextBox Value' id='getButtonValue'>
+						<button type="button" value='Add Field' id='addButton'
+							class="btn btn-primary">Add Field</button>
+						<button type="button" value='Remove Field' id='removeButton'
+							class="btn btn-danger">Remove Field</button>
 						<div class="clearfix"></div>
-						</br>
+
 						<button type="button" style="margin-left: 400px"
-							onclick="saveOcrCoordMapping()" class="btn btn-primary">Submit</button>
+							onclick="saveOcrCoordMapping()" class="btn btn-success">Submit</button>
 					</div>
 				</div>
 			</div>

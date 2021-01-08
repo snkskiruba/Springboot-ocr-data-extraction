@@ -106,9 +106,4 @@ public class UserController {
 		return "ocr";
 	}
 
-	@GetMapping("/ocr")
-	public String ocr() {
-
-		return "ocr";
-	}
 }
